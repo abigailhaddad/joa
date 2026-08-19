@@ -92,6 +92,8 @@ pipeline rather than reaching for R2 themselves — see `PIPELINE.md`.
 
 ## The analysis
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/abigailhaddad/joa/blob/main/rule_of_many.ipynb)
+
 `rule_of_many.ipynb` is the readable version — the query, the two kinds of
 mention side by side, the monthly chart, and the agencies that only ever
 disclaim the rule. It runs top to bottom in about a minute.
