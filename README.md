@@ -92,27 +92,34 @@ pipeline rather than reaching for R2 themselves — see `PIPELINE.md`.
 
 ## The analysis
 
+`rule_of_many.ipynb` is the readable version — the query, the two kinds of
+mention side by side, the monthly chart, and the agencies that only ever
+disclaim the rule. It runs top to bottom in about a minute.
+
+The same thing from the command line:
+
 ```bash
-./analyze.sh          # server-side against the HF dataset, hits only come back
-python3 classify.py   # sort mentions into applied / negated
+python3 rule_of_many.py            # query, classify, write results/
+python3 rule_of_many.py --cached   # reclassify results/ without re-querying
 ```
 
-`analyze.sh` reads `hf://datasets/abigailhaddad/usajobs-scraping/data/*.parquet`
-and downloads nothing but the matches. Point `DATASET` somewhere else to run
-against a local build.
+Both go through `rule_of_many.py`, which queries
+`hf://datasets/abigailhaddad/usajobs-scraping/data/*.parquet` and downloads
+nothing but the matches. Pass `--dataset` (or `rom.fetch(dataset=...)`) to point
+somewhere else.
 
-Every rule for reading a mention is in `patterns.yaml`. Edit it and rerun
-`classify.py` — it works off the saved contexts, so nothing is re-queried. A
-posting counts as `applied` if any occurrence reads that way, `negated` if all
-of them read as negations, `unclear` if no rule fires. Currently nothing is
-unclear, and no posting contains both readings.
+Every rule for reading a mention is in `patterns.yaml`. Edit it and reclassify
+off the saved contexts — nothing is re-queried. A posting counts as `applied` if
+any occurrence reads that way, `negated` if all of them read as negations,
+`unclear` if no rule fires. Currently nothing is unclear, and no posting contains
+both readings.
 
 ## Output
 
 - `results/rule_of_many.csv` — one row per announcement, with `status`,
   occurrence count, agency, series, dates, and a link
-- `results/contexts.csv` — every occurrence with ±300 characters, what
-  `classify.py` reads
+- `results/contexts.csv` — every occurrence with ±300 characters, what the
+  classifier reads
 - `results/hits.csv` — the raw matches before classification
 - `results/monthly_counts.csv` — postings, "rule of many", "rule of three" by month
 
@@ -136,5 +143,6 @@ A handful of announcements are agency test postings with placeholder content
 - `hf_dataset.py` — compaction into monthly parquets plus the manifest
 - `publish_hf.py` — build and push
 - `update_daily.py` — the daily top-up, one commit per run
-- `analyze.sh`, `classify.py`, `patterns.yaml` — the analysis
+- `rule_of_many.ipynb` — the analysis, with charts
+- `rule_of_many.py`, `patterns.yaml` — the query and the classification rules
 - `PIPELINE.md` — wiring the daily update into usajobs_historical
