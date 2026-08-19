@@ -78,19 +78,24 @@ every 2026 announcement, page text plus 39 structured fields from the Historical
 API, one parquet per month, updated daily. 162,030 rows, 241 MB.
 
 ```bash
-./find_controls.sh    # the posting list, from the historical mirror
-python3 scrape_2026.py  # ~2 hours for a full year at 1,350 pages/min
-python3 publish_hf.py --dry-run   # build/, uploading nothing
-python3 publish_hf.py             # create the repo and push, one commit
+python3 dataset.py               # posting list and metadata, from the mirror
+python3 scrape.py                # ~2 hours for a year at 1,350 pages/min
+python3 publish.py --dry-run     # build/, uploading nothing
+python3 publish.py               # create the repo and push, one commit
 ```
 
-`scrape_2026.py` is resumable and crash-safe. Shards are immutable part files
-tagged with a per-run id, and a rerun skips every control number already stored,
-so you can kill it whenever.
+`scrape.py` is resumable and crash-safe. Shards are immutable part files tagged
+with a per-run id, and a rerun skips every control number already stored, so you
+can kill it whenever.
 
-Daily updates run inside the
+Daily updates run as a step inside the
 [usajobs_historical](https://github.com/abigailhaddad/usajobs_historical)
-pipeline rather than reaching for R2 themselves — see `PIPELINE.md`.
+pipeline, which clones this repo and runs `update_daily.py` after its own
+collection. That step reads `data/historical_jobs_2026.parquet` off disk — the
+copy that run just refreshed — so nothing here needs R2 credentials. About 800
+new postings a day, roughly 40 seconds. On the first of the month it passes
+`--refresh-all` to re-join metadata across every month, since close dates and
+opening status keep changing after a posting appears.
 
 ## The analysis
 
@@ -141,12 +146,11 @@ A handful of announcements are agency test postings with placeholder content
 
 ## Layout
 
-- `find_controls.sh` — the 2026 posting list from the historical mirror
-- `scrape_2026.py`, `scrape_lib.py` — the scrape
-- `build_metadata.py` — structured fields, local pipeline copy first, public URL as fallback
-- `hf_dataset.py` — compaction into monthly parquets plus the manifest
-- `publish_hf.py` — build and push
-- `update_daily.py` — the daily top-up, one commit per run
+- `dataset.py` — the posting list, the structured fields, and compaction into
+  monthly parquets. Prefers the pipeline's local mirror copy, falls back to the
+  public URL.
+- `scrape.py` — the scrape, and the fetch `update_daily.py` reuses
+- `publish.py` — build `build/` and push it in one commit
+- `update_daily.py` — the nightly top-up (named for the pipeline that calls it)
 - `rule_of_many.ipynb` — the analysis, with charts
 - `rule_of_many.py`, `patterns.yaml` — the query and the classification rules
-- `PIPELINE.md` — wiring the daily update into usajobs_historical

@@ -35,9 +35,8 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
 
-import build_metadata
-from hf_dataset import BUILD, METADATA, REPO_ID
-from scrape_lib import scrape
+from dataset import BUILD, METADATA, REPO_ID, build_metadata
+from scrape import scrape
 
 
 def month_of(open_date: str) -> str:
@@ -63,7 +62,7 @@ def main() -> None:
         dtype=str)["usajobsControlNumber"])
     print(f"dataset holds {len(have):,} announcements")
 
-    build_metadata.main(args.source)
+    build_metadata(args.source)
     meta = pq.read_table(METADATA).to_pandas().drop_duplicates("usajobsControlNumber")
     todo = {r.usajobsControlNumber: r.positionOpenDate
             for r in meta.itertuples() if r.usajobsControlNumber not in have}

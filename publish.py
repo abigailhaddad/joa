@@ -5,8 +5,9 @@ Compact the scraped shards and push them to HuggingFace as a dataset.
 Needs a write token: `huggingface-cli login`, or HF_TOKEN in the environment.
 Override the destination with HF_DATASET_REPO.
 
-    python3 publish_hf.py            # compact, then upload
-    python3 publish_hf.py --dry-run  # compact and write build/, upload nothing
+    python3 publish.py            # compact, then upload
+    python3 publish.py --dry-run  # compact and write build/, upload nothing
+    python3 publish.py --no-build # upload build/ as it stands
 """
 
 import argparse
@@ -16,8 +17,7 @@ from pathlib import Path
 
 from huggingface_hub import HfApi
 
-import build_metadata
-from hf_dataset import BUILD, REPO_ID, compact, write_manifest
+from dataset import BUILD, REPO_ID, build_metadata, compact, write_manifest
 
 CARD = """---
 license: cc0-1.0
@@ -137,7 +137,7 @@ def main() -> None:
                   for p in sorted((BUILD / "data").glob("*.parquet"))}
         n = sum(1 for _ in (BUILD / "manifest.csv").open()) - 1
     else:
-        build_metadata.main()
+        build_metadata()
         print("compacting shards ...", flush=True)
         counts = compact()
         n = write_manifest()

@@ -9,3 +9,4 @@ results/scrape.log
 results/contexts.csv
 __pycache__/
 *.pyc
+results/hits.csv
