@@ -1,0 +1,36 @@
+# Rules for reading a "rule of many" mention. Edit these and rerun classify.py;
+# it works off results/contexts.csv, so no re-querying.
+#
+# Every rule is a regex matched against a lowercased ±300-character window
+# around one occurrence of the phrase. `many` stands in for the phrase itself.
+
+# The rule is being named in order to say it does NOT apply. Almost always a
+# direct-hire-authority announcement listing what it's exempt from.
+negated:
+  - "many[^.]{0,150}\\b(do|does) not apply"
+  - "many[^.]{0,150}\\bnot applicable"
+  - "many[^.]{0,150}will not be (used|applied|followed)"
+  - "many[^.]{0,150}(are|is) not (used|applied|being used)"
+  - "\\b(do|does) not (add|apply)[^.]{0,80}many"
+  - "waive[sd]?[^.]{0,80}many"
+  - "exempt(ed)? from[^.]{0,80}many"
+
+# The announcement is telling you this is how referral will work.
+applied:
+  - "(uses|using|use|used|adheres to|applies|applying|apply)[^.]{0,40}many"
+  - "many[^.]{0,60}(rating|referral|ranking)? ?procedure"
+  - "many[^.]{0,80}5 ?c\\.? ?f\\.? ?r"
+  - "under (the )?many"
+  - "many[^.]{0,120}(numerical(ly)? rank|numeric score|ranked in score order)"
+  - "many[^.]{0,120}will be referred"
+  - "referred[^.]{0,80}many"
+  - "many method"
+  - "many[^.]{0,120}not limited to (considering )?the top three"
+  - "many referral method"
+  - "implement(s|ing|ed)?[^.]{0,40}many"
+  - "in the many\\b *,"
+  - "information on many"
+
+# Announcements checked by hand whose phrasing the rules above read wrong.
+# control number: applied | negated
+overrides: {}

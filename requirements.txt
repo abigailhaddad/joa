@@ -1,0 +1,6 @@
+beautifulsoup4>=4.12
+duckdb>=1.1
+huggingface_hub>=0.28
+pandas>=2.2
+pyarrow>=17
+requests>=2.32

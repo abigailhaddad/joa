@@ -1,0 +1,11 @@
+cache/
+results/parts/
+results/scan.log
+*.tmp
+build/
+work/
+reference/controls_2026.csv
+results/scrape.log
+results/contexts.csv
+__pycache__/
+*.pyc
