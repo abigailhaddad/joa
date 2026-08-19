@@ -1,0 +1,35 @@
+# Can a GitHub runner reach usajobs.gov? The site sits behind Akamai and 403s
+# anything that doesn't look like a browser; whether it also objects to runner
+# IPs can't be tested from a laptop. Run this by hand before trusting a
+# scheduled scrape.
+name: check runner reachability
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install beautifulsoup4 requests
+      - name: Fetch a known announcement
+        run: |
+          python3 - <<'EOF'
+          import sys
+          from scrape_lib import new_session, page_text
+          ok = True
+          for cn in ("855359900", "853343300"):
+              r = new_session().get(f"https://www.usajobs.gov/job/{cn}", timeout=45)
+              text = page_text(r.text) if r.ok else ""
+              print(f"{cn}: status {r.status_code}, {len(text):,} chars, "
+                    f"phrase present: {'rule of many' in text.lower()}")
+              ok = ok and r.ok and len(text) > 5000
+          if not ok:
+              sys.exit("usajobs.gov is not serving this runner.")
+          print("runner can scrape usajobs.gov")
+          EOF
