@@ -10,7 +10,8 @@ HuggingFace, and the analysis that runs against it.
 ## What we found
 
 659 announcements printed the phrase. **405 use the method. 254 name it to say
-it doesn't apply.**
+it doesn't apply.** That's a quarter of one percent of the 162,030 announcements
+posted in 2026, peaking at 0.53% in May.
 
 That second group is almost all direct-hire-authority announcements listing what
 they're exempt from:
@@ -25,16 +26,16 @@ None of those four agencies uses the method at all.
 
 Among the 405 that do, it climbed hard through the spring:
 
-| month | uses it | says it doesn't apply | announcements |
-|-------|----|----|--------|
-| Jan | 1 | 3 | 16,173 |
-| Feb | 7 | 6 | 18,837 |
-| Mar | 27 | 27 | 23,124 |
-| Apr | 41 | 62 | 23,845 |
-| May | 116 | 39 | 21,901 |
-| Jun | 82 | 20 | 21,965 |
-| Jul | 87 | 75 | 22,597 |
-| Aug | 44 | 22 | 13,588 |
+| month | uses it | says it doesn't apply | announcements | % using it |
+|-------|----|----|--------|------|
+| Jan | 1 | 3 | 16,173 | 0.006% |
+| Feb | 7 | 6 | 18,837 | 0.037% |
+| Mar | 27 | 27 | 23,124 | 0.117% |
+| Apr | 41 | 62 | 23,845 | 0.172% |
+| May | 116 | 39 | 21,901 | 0.530% |
+| Jun | 82 | 20 | 21,965 | 0.373% |
+| Jul | 87 | 75 | 22,597 | 0.385% |
+| Aug | 44 | 22 | 13,588 | 0.324% |
 
 August runs through the 19th. "Rule of three" held flat at 136–258 a month the
 whole time.
