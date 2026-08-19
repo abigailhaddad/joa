@@ -62,8 +62,10 @@ page shows. There are confirmed cases where the page says "Rule of Many" and the
 API record doesn't.
 
 Together those cost a lot. The API text finds 502 mentions. The scraped pages
-find 659 — a 31% undercount, and it hides whole agencies: Federal Highway and
-Federal Transit don't appear in the API results at all.
+find 659 — a 31% undercount, and it hides whole agencies. All 60 of Federal
+Highway's announcements naming the rule are in the API, with the phrase absent
+from the text of every one. Read the API and the agency looks like it has never
+encountered it.
 
 Neither gap can be backfilled from the API afterward. The Historical API returns
 metadata only, and Search returns open jobs only. usajobs.gov serves closed
