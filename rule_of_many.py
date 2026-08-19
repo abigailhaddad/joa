@@ -41,6 +41,18 @@ MONTHLY = RESULTS / "monthly_counts.csv"
 CLASSIFIED = RESULTS / "rule_of_many.csv"
 
 
+def _connect() -> duckdb.DuckDBPyConnection:
+    """A connection that can read hf:// URLs.
+
+    INSTALL is needed on a fresh machine -- Colab ships DuckDB without the
+    httpfs extension -- and is a no-op once it's on disk.
+    """
+    con = duckdb.connect()
+    con.execute("INSTALL httpfs; LOAD httpfs;")
+    con.execute("SET http_retries=5; SET enable_progress_bar=false;")
+    return con
+
+
 def _rules() -> dict:
     return yaml.safe_load(Path("patterns.yaml").read_text())
 
@@ -51,8 +63,7 @@ def _compile(group: str) -> list[re.Pattern]:
 
 def fetch(dataset: str = DATASET, save: bool = True):
     """Query the dataset for matches. Returns (hits, contexts) as DataFrames."""
-    con = duckdb.connect()
-    con.execute("LOAD httpfs; SET http_retries=5; SET enable_progress_bar=false;")
+    con = _connect()
     con.execute(f"""
         CREATE TABLE hits AS
         SELECT usajobsControlNumber, positionOpenDate, positionCloseDate,
@@ -82,8 +93,7 @@ def fetch(dataset: str = DATASET, save: bool = True):
 
 def monthly(dataset: str = DATASET, save: bool = True) -> pd.DataFrame:
     """Per month: every posting, plus mentions of each rule. The denominator."""
-    con = duckdb.connect()
-    con.execute("LOAD httpfs; SET http_retries=5; SET enable_progress_bar=false;")
+    con = _connect()
     df = con.execute(f"""
         SELECT replace(substr(positionOpenDate,1,7),'-','_') AS month,
                count(*) AS postings,
