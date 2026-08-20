@@ -32,7 +32,7 @@ import pandas as pd
 import yaml
 
 DATASET = "hf://datasets/abigailhaddad/usajobs-scraping/data/*.parquet"
-PHRASE = r"rule[ -]of[ -](?:the[ -])?many"
+PHRASE = r"rule[ -]of[ -](?:the[ -])?many"          # the umbrella term
 RESULTS = Path("results")
 
 HITS = RESULTS / "hits.csv"
@@ -61,16 +61,27 @@ def _compile(group: str) -> list[re.Pattern]:
     return [re.compile(p.replace("many", PHRASE)) for p in _rules().get(group, [])]
 
 
+def search_families() -> dict[str, str]:
+    """{label: regex} for each way announcements name this method."""
+    return _rules()["search"]
+
+
+def search_regex() -> str:
+    """One regex matching any of them, for the server-side query."""
+    return "|".join(f"({r})" for r in search_families().values())
+
+
 def fetch(dataset: str = DATASET, save: bool = True):
     """Query the dataset for matches. Returns (hits, contexts) as DataFrames."""
     con = _connect()
+    rx = search_regex()
     con.execute(f"""
         CREATE TABLE hits AS
         SELECT usajobsControlNumber, positionOpenDate, positionCloseDate,
                hiringAgencyName, hiringDepartmentName, occupationalSeries,
                announcementNumber, text
         FROM read_parquet('{dataset}')
-        WHERE regexp_matches(text, '(?i){PHRASE}')
+        WHERE regexp_matches(text, '(?i){rx}')
     """)
     hits = con.execute("""
         SELECT usajobsControlNumber, positionOpenDate, positionCloseDate,
@@ -81,7 +92,7 @@ def fetch(dataset: str = DATASET, save: bool = True):
     """).df()
     contexts = con.execute(f"""
         SELECT usajobsControlNumber,
-               unnest(regexp_extract_all(text, '.{{0,300}}(?i){PHRASE}.{{0,300}}')) AS ctx
+               unnest(regexp_extract_all(text, '.{{0,300}}(?i)({rx}).{{0,300}}')) AS ctx
         FROM hits
     """).df()
     if save:
@@ -94,10 +105,12 @@ def fetch(dataset: str = DATASET, save: bool = True):
 def monthly(dataset: str = DATASET, save: bool = True) -> pd.DataFrame:
     """Per month: every posting, plus mentions of each rule. The denominator."""
     con = _connect()
+    rx = search_regex()
     df = con.execute(f"""
         SELECT replace(substr(positionOpenDate,1,7),'-','_') AS month,
                count(*) AS postings,
                count(*) FILTER (regexp_matches(text, '(?i){PHRASE}')) AS rule_of_many,
+               count(*) FILTER (regexp_matches(text, '(?i){rx}')) AS any_name,
                count(*) FILTER (regexp_matches(text, '(?i)rule[ -]of[ -](the[ -])?three'))
                    AS rule_of_three
         FROM read_parquet('{dataset}')

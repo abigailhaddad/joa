@@ -9,9 +9,17 @@ HuggingFace, and the analysis that runs against it.
 
 ## What we found
 
-659 announcements printed the phrase. **405 use the method. 254 name it to say
-it doesn't apply.** That's a quarter of one percent of the 162,030 announcements
-posted in 2026, peaking at 0.53% in May.
+721 announcements named it. **467 use the method. 254 name it to say it doesn't
+apply.** That's 0.29% of the 162,030 announcements posted in 2026, peaking at
+0.58% in May.
+
+Agencies don't call it one thing. Some use "Rule of Many" as an umbrella term,
+others name the specific OPM mechanism — "the Cut Score method under 5 CFR §
+332.402", "Mechanism C - Set number of highest-ranked eligibles". Same
+regulation, same referral. Searching only the umbrella term misses 62
+announcements, 34 of them at Veterans Health, which by that reading never uses
+the method and is in fact the third heaviest user. Both families are in
+`patterns.yaml`.
 
 That second group is almost all direct-hire-authority announcements listing what
 they're exempt from:
@@ -20,9 +28,9 @@ they're exempt from:
 > "Rule of Many" do not apply.
 
 A raw phrase match counts those as adopters, and they're 39% of the matches.
-Every single one of SSA's 79 mentions is a negation, as are all 60 at Federal
-Highway, all 38 at the National Gallery of Art, and all 28 at Federal Transit.
-None of those four agencies uses the method at all.
+Every one of SSA's 79 mentions is a negation, as are all 60 at Federal Highway,
+all 38 at the National Gallery of Art, and all 28 at Federal Transit. None of
+those four agencies uses the method at all.
 
 Among the 405 that do, it climbed hard through the spring:
 
@@ -30,19 +38,18 @@ Among the 405 that do, it climbed hard through the spring:
 |-------|----|----|--------|------|
 | Jan | 1 | 3 | 16,173 | 0.006% |
 | Feb | 7 | 6 | 18,837 | 0.037% |
-| Mar | 27 | 27 | 23,124 | 0.117% |
-| Apr | 41 | 62 | 23,845 | 0.172% |
-| May | 116 | 39 | 21,901 | 0.530% |
-| Jun | 82 | 20 | 21,965 | 0.373% |
-| Jul | 87 | 75 | 22,597 | 0.385% |
-| Aug | 44 | 22 | 13,588 | 0.324% |
+| Mar | 29 | 27 | 23,124 | 0.125% |
+| Apr | 69 | 62 | 23,845 | 0.289% |
+| May | 127 | 39 | 21,901 | 0.580% |
+| Jun | 86 | 20 | 21,965 | 0.392% |
+| Jul | 100 | 75 | 22,597 | 0.443% |
+| Aug | 48 | 22 | 13,588 | 0.353% |
 
 August runs through the 19th. "Rule of three" held flat at 136–258 a month the
 whole time.
 
-NLRB accounts for 138 of the 405, then FCC (43), NARA (20), Western Area Power
-(19), DFC (18), EEOC (17), Fiscal Service (15), Treasury Departmental Offices
-(14). The earliest is a DOJ paralegal announcement from January
+NLRB accounts for 138 of the 467, then FCC (43), Veterans Health (34), NARA (21),
+Western Area Power (19), DFC (18), EEOC (17). The earliest is a DOJ paralegal announcement from January
 ([855359900](https://www.usajobs.gov/job/855359900)):
 
 > Your application will be evaluated and rated under using the Rule of Many
@@ -62,8 +69,8 @@ For postings the API does return, `MatchedObjectDescriptor` drops content the
 page shows. There are confirmed cases where the page says "Rule of Many" and the
 API record doesn't.
 
-Together those cost a lot. The API text finds 502 mentions. The scraped pages
-find 659 — a 31% undercount, and it hides whole agencies. All 60 of Federal
+Together those cost a lot. The API text finds 556 announcements. The scraped
+pages find 721 — a 23% undercount, and it hides whole agencies. All 60 of Federal
 Highway's announcements naming the rule are in the API, with the phrase absent
 from the text of every one. Read the API and the agency looks like it has never
 encountered it.
