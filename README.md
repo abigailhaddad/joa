@@ -13,6 +13,13 @@ HuggingFace, and the analysis that runs against it.
 apply.** That's 0.29% of the 162,030 announcements posted in 2026, peaking at
 0.58% in May.
 
+For scale, the method it competes with is everywhere. "Category rating" — quality
+categories instead of numeric scores, under 5 USC 3319 — appears in 13,255
+announcements, 8.2% of the year. The two are alternatives, and announcements
+using category rating say so: "This category rating process does not add
+veterans' preference points or apply the 'rule of many.'" 70 announcements name
+both; 54 of those are category-rating announcements disclaiming this one.
+
 Agencies don't call it one thing. Some use "Rule of Many" as an umbrella term,
 others name the specific OPM mechanism — "the Cut Score method under 5 CFR §
 332.402", "Mechanism C - Set number of highest-ranked eligibles". Same
