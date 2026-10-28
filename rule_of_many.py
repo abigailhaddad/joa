@@ -30,6 +30,7 @@ import re
 import tempfile
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
+from functools import cache
 from pathlib import Path
 
 import duckdb
@@ -40,6 +41,8 @@ from huggingface_hub import HfApi, hf_hub_url
 from huggingface_hub.utils import build_hf_headers
 
 REPO = "abigailhaddad/usajobs-scraping"
+UPSTREAM = ("https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/data/"     # Historical API mirror
+            "historical_jobs_{}.parquet")
 PHRASE = r"rule[ -]*of[ -]*(?:the[ -]*)?many"       # the umbrella term
 
 # The scraper collapses whitespace, but these survive it and break a literal
@@ -170,6 +173,49 @@ def scan(revision: str | None = None, workers: int = WORKERS) -> pd.DataFrame:
     return pd.concat(parts, ignore_index=True)
 
 
+@cache
+def latest_dates() -> pd.DataFrame:
+    """Each control number's latest open date, and the close date that goes
+    with it, per the Historical API mirror.
+
+    A reposting keeps its control number and gets new dates. The dataset can
+    hold the old dates, or both copies in two months. The scraped page is the
+    current posting, so its text belongs with the latest dates.
+    """
+    con = _connect()
+    con.execute("INSTALL httpfs; LOAD httpfs; SET http_retries=5")
+    parts = []
+    for year in range(2013, pd.Timestamp.today().year + 1):
+        parts.append(con.execute(f"""
+            SELECT usajobsControlNumber::VARCHAR AS usajobsControlNumber,
+                   substr(positionOpenDate::VARCHAR, 1, 10) AS positionOpenDate,
+                   substr(positionCloseDate::VARCHAR, 1, 10) AS positionCloseDate
+            FROM read_parquet('{UPSTREAM.format(year)}')
+        """).df())
+    return (pd.concat(parts).sort_values("positionOpenDate")
+              .drop_duplicates("usajobsControlNumber", keep="last")
+              .set_index("usajobsControlNumber"))
+
+
+def postings(revision: str | None = None) -> pd.DataFrame:
+    """scan(), one row per control number, dated by its latest posting."""
+    s = scan(revision).assign(usajobsControlNumber=lambda d: d.usajobsControlNumber.astype(str))
+    flags = ["rule_of_many", "any_name", "rule_of_three"]
+    merged = s.groupby("usajobsControlNumber")[flags].max()
+    one = (s.sort_values(["any_name", "positionOpenDate"])
+            .drop_duplicates("usajobsControlNumber", keep="last")
+            .set_index("usajobsControlNumber"))
+    one[flags] = merged
+    api = latest_dates().reindex(one.index)
+    redated = api.positionOpenDate.notna() & (api.positionOpenDate != one.positionOpenDate)
+    one["positionOpenDate"] = api.positionOpenDate.fillna(one.positionOpenDate)
+    one["positionCloseDate"] = api.positionCloseDate.fillna(one.positionCloseDate)
+    print(f"{len(s) - len(one):,} extra copies of reposted announcements dropped, "
+          f"{redated.sum():,} redated to their latest posting, "
+          f"{api.positionOpenDate.isna().sum():,} not in the API mirror", flush=True)
+    return one.reset_index()
+
+
 def _rules() -> dict:
     return yaml.safe_load(Path("patterns.yaml").read_text())
 
@@ -192,7 +238,7 @@ def fetch(revision: str | None = None, save: bool = True):
     """Every posting that names the method. Returns (hits, contexts)."""
     rx = search_regex()
     con = _connect()
-    found = scan(revision).query("any_name")
+    found = postings(revision).query("any_name")
     con.register("found", found)
     hits = con.execute(f"""
         SELECT {COLS},
@@ -213,7 +259,7 @@ def fetch(revision: str | None = None, save: bool = True):
 
 def monthly(revision: str | None = None, save: bool = True) -> pd.DataFrame:
     """Per month: every posting, plus mentions of each rule. The denominator."""
-    df = (scan(revision)
+    df = (postings(revision)
           .assign(month=lambda d: d.positionOpenDate.str[:7].str.replace("-", "_"))
           .groupby("month", as_index=False)
           .agg(postings=("usajobsControlNumber", "size"),

@@ -150,9 +150,12 @@ Agency names aren't unique. "Office of Inspector General" and "Other Agencies
 and Independent Organizations" sit under several departments, so the notebook
 adds the department to those.
 
-Reposted announcements aren't handled well yet. Month totals shift between
-runs, and a few control numbers sit in two months at once; reopenings are the
-likely cause.
+A reposted announcement keeps its control number and gets new dates, and the
+dataset can hold the old dates or both copies. The analysis keeps one row per
+control number and dates it by its latest posting, from the Historical API
+mirror. That's also the version the scraped page shows, so text and date agree.
+The page text is as of the scrape, though, not as of the open date: an
+announcement amended after it opened shows its amended wording.
 
 A handful of announcements are agency test postings with placeholder content
 ("There will be duties to perform for this position").
