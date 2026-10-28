@@ -5,7 +5,7 @@
 # others name the specific OPM mechanism. Both are 5 CFR 332.402 referral, where
 # everyone at or above a cut score goes to the selecting official.
 search:
-  rule_of_many: "rule[ -]of[ -](the[ -])?many"
+  rule_of_many: "rule[ -]*of[ -]*(the[ -]*)?many"
   named_mechanism: "(cut[- ]?off score|cut score|mechanism [abc]\\b|set number of (the )?(highest|applicants|candidates)|top percentage)[^.]{0,90}method under 5 ?c\\.?f\\.?r"
 
 # The rule is being named in order to say it does NOT apply. Almost always a
