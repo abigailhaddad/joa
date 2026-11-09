@@ -34,6 +34,7 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
+from huggingface_hub.utils import EntryNotFoundError
 
 from dataset import BUILD, METADATA, REPO_ID, build_metadata
 from scrape import scrape
@@ -97,7 +98,10 @@ def main() -> None:
             existing = pq.read_table(
                 hf_hub_download(args.repo, name, repo_type="dataset", token=token)
             ).to_pandas()
-        except Exception:
+        except EntryNotFoundError:
+            # Only a month that really isn't in the dataset yet starts empty.
+            # Any other failure (429, network) must abort: treating it as
+            # empty would rewrite the month with only today's new rows.
             existing = pd.DataFrame(columns=["usajobsControlNumber", "text"])
 
         text = pd.concat([
