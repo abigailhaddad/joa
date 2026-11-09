@@ -35,6 +35,10 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
 from huggingface_hub.utils import EntryNotFoundError
+try:
+    from huggingface_hub.errors import LocalEntryNotFoundError
+except ImportError:  # old huggingface_hub
+    from huggingface_hub.utils import LocalEntryNotFoundError
 
 from dataset import BUILD, METADATA, REPO_ID, build_metadata
 from scrape import scrape
@@ -42,6 +46,23 @@ from scrape import scrape
 
 def month_of(open_date: str) -> str:
     return open_date[:7].replace("-", "_")
+
+
+def load_existing_month(repo: str, name: str, token) -> pd.DataFrame:
+    """Existing rows for one month file, or an empty frame if it is not in the dataset yet.
+
+    LocalEntryNotFoundError is a subclass of EntryNotFoundError, and
+    hf_hub_download raises it when its HEAD request fails (429, 5xx, timeout)
+    with no cached copy, so it must propagate rather than mean "new month".
+    """
+    try:
+        return pq.read_table(
+            hf_hub_download(repo, name, repo_type="dataset", token=token)
+        ).to_pandas()
+    except EntryNotFoundError as e:
+        if isinstance(e, LocalEntryNotFoundError):
+            raise
+        return pd.DataFrame(columns=["usajobsControlNumber", "text"])
 
 
 def main() -> None:
@@ -94,15 +115,7 @@ def main() -> None:
     changed = []
     for month in sorted(touched):
         name = f"data/{month}.parquet"
-        try:
-            existing = pq.read_table(
-                hf_hub_download(args.repo, name, repo_type="dataset", token=token)
-            ).to_pandas()
-        except EntryNotFoundError:
-            # Only a month that really isn't in the dataset yet starts empty.
-            # Any other failure (429, network) must abort: treating it as
-            # empty would rewrite the month with only today's new rows.
-            existing = pd.DataFrame(columns=["usajobsControlNumber", "text"])
+        existing = load_existing_month(args.repo, name, token)
 
         text = pd.concat([
             existing[["usajobsControlNumber", "text"]],
